@@ -6,6 +6,7 @@ import logo from '../assets/imgs/logo.png';
 import '../assets/css/footer.scss';
 import '../assets/css/body.scss';
 import '../assets/css/exitPage.scss';
+import obj from '../services/loading';
 
 export default class CreateAccount extends React.Component {
 
@@ -19,7 +20,7 @@ export default class CreateAccount extends React.Component {
             mail:''
         };
 
-        this.send = this.send.bind(this);
+        this.createAccount = this.createAccount.bind(this);
         this.username = React.createRef();
 
         this.handleChange =this.handleChange.bind(this);
@@ -36,13 +37,27 @@ export default class CreateAccount extends React.Component {
         this.setState({[name]:value});
     }
 
-    send() {
+    createAccount() {
 
         USER.CREATE_USER.User = {
             username:this.state.username,
-            password: this.state.password
+            password: this.state.password,
+            mail: this.state.mail,
+            callback: function (statusCode,message_result) {
+                
+                obj.closeLoading();
+
+                if (statusCode === 201) {
+                    alert('Conta criada com sucesso!');
+                    window.location.href = '#/';
+                }
+                else {
+                    alert(message_result);
+                }
+            }
         };
 
+        obj.showLoading();
         store.dispatch(USER.CREATE_USER);
     }
 
@@ -106,7 +121,7 @@ export default class CreateAccount extends React.Component {
         
                     <div className='row'>
                         <div className='col-12 col-sm-12 col-md-12 col-lg-6 col-xl-6 container'>
-                            <button className='btn btn-primary' disabled={!state.mail || !state.password || !state.username}>Enviar</button>
+                            <button className='btn btn-primary' onClick={this.createAccount} disabled={!state.mail || !state.password || !state.username}>Enviar</button>
                             <button className='btn btn-danger' onClick={this.clearFields} style={{marginLeft:'1%'}}>Limpar</button>
                         </div>
                     </div>  

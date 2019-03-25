@@ -6,9 +6,16 @@ import store from '../store/store';
 import UserAction from '../actions/user-action';
 import '../assets/css/footer.scss';
 import '../assets/css/body.scss';
+import context from '../services/context';
+
+import obj from '../services/loading';
+ 
+var Event = require('events').EventEmitter;
 var $ = require('jquery');
 
 class LoginComponent extends React.Component {
+
+    static contextType = context;
 
     static defaultProps = {
         title:'Painel de Acesso'
@@ -41,13 +48,31 @@ class LoginComponent extends React.Component {
         this.setState({[name]:value});
     }
 
-    send() {
-        // call reducer by actions and set in store
+    send(event) {
+       // call reducer by actions and set in store
+        obj.showLoading();
         UserAction.LOGIN.username = this.state.username;
         UserAction.LOGIN.password = this.state.password;
-        store.dispatch(UserAction.LOGIN);
 
-        console.warn(store.getState().UserReducer.username + ' - ' + store.getState().UserReducer.password);
+            (function(self,UserAction){
+
+                UserAction.LOGIN.callback = function (statusCode,message_error) {
+
+                    if (statusCode == 200) {
+                        self.context.username = self.state.username;
+                        window.location.href = '#/webchat';
+                    }
+                    else {
+                        obj.closeLoading();
+                        self.validation.current.textContent = message_error;
+                        self.setState({username:'',password:''});
+                        self.username.current.focus();
+                    }          
+                }
+
+        })(this,UserAction);
+
+        store.dispatch(UserAction.LOGIN);     
     }
 
     render() {
@@ -80,8 +105,9 @@ class LoginComponent extends React.Component {
                                 type='text' 
                                 className='form-control' 
                                 maxLength='25' 
-                                placeholder='Informe o nome de usuário' 
-                                autoFocus='autoFocus' />      
+                                placeHolder='Informe o nome de usuário' 
+                                autoFocus='autoFocus'
+                                value={state.username} />      
                     </div>
                 </div>                 
 
@@ -94,7 +120,8 @@ class LoginComponent extends React.Component {
                                 type='password' 
                                 className='form-control' 
                                 maxLength='16' 
-                                placeholder='Informe a senha de usuário' />   
+                                placeHolder='Informe a senha de usuário' 
+                                value={state.password} />   
                     </div>
                   
                 </div>  
@@ -104,8 +131,8 @@ class LoginComponent extends React.Component {
                         <br />
                         <button disabled={!this.state.username || !this.state.password} onClick={this.send} className='btn btn-primary'>Acessar</button> 
                         <span style={{marginLeft:'10%'}}>Não tem uma conta? <Link to='/register'>clique aqui</Link></span>  
-                        <br /> 
-                        <label ref={this.validation}></label>
+                        <br /> <br/>
+                        <label style={{color:'red'}} ref={this.validation}></label>
                     </div>
                 </div> 
             </div>

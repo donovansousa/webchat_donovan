@@ -7,6 +7,7 @@ import '../assets/css/footer.scss';
 import '../assets/css/body.scss';
 import '../assets/css/exitPage.scss';
 import obj from '../services/loading';
+import {obj as util} from '../services/util';
 
 export default class CreateAccount extends React.Component {
 
@@ -17,7 +18,9 @@ export default class CreateAccount extends React.Component {
         this.state = {
             username:'',
             password:'',
-            mail:''
+            mail:'',
+            mailaddressIsValid:false,
+            mailKeyPressed:false,
         };
 
         this.createAccount = this.createAccount.bind(this);
@@ -26,6 +29,25 @@ export default class CreateAccount extends React.Component {
         this.handleChange =this.handleChange.bind(this);
         this.goToLoginPage = this.goToLoginPage.bind(this);
         this.clearFields = this.clearFields.bind(this);
+        this.mailIsValid = this.mailIsValid.bind(this);
+    }
+
+    mailIsValid(event) {
+
+        (function(self,util) {
+
+            self.setState({mailKeyPressed : true});
+
+            if(util.validateMail(self.state.mail) == true) {
+                
+                self.setState({mailaddressIsValid:true});
+            }
+            else {
+                self.setState({mailaddressIsValid:false});
+            }
+ 
+
+        })(this,util);
     }
 
     handleChange(event) {
@@ -69,7 +91,7 @@ export default class CreateAccount extends React.Component {
     }
     
     clearFields() {
-        this.setState({username:'',password:'',mail:''});
+        this.setState({username:'',password:'',mail:'',mailaddressIsValid:false,mailKeyPressed:false});
         this.username.current.focus();
     }
 
@@ -116,7 +138,12 @@ export default class CreateAccount extends React.Component {
                     <div className='row'>
                         <div className='col-12 col-sm-12 col-md-12 col-lg-6 col-xl-6 container'>
                             <span>E-mail:</span>
-                            <input onChange={this.handleChange} placeholder='Informe o e-mail de usuário' type='mail' className='form-control' maxLength='100' name='mail' value={state.mail} />
+                            <input onKeyDown={this.mailIsValid} onChange={this.handleChange} placeholder='Informe o e-mail de usuário' type='mail' className='form-control' maxLength='100' name='mail' value={state.mail} />
+                            <div style={{'color':'red', 'display': state.mailaddressIsValid && 
+                                                                   state.mail.length > 0  ? 'none':'' }}>
+                                <span style={{display: state.mailKeyPressed ? '':'none'}}>O e-mail informádo é inválido!</span>
+                            </div>
+                           
                         </div>
                     </div>                
 
@@ -124,7 +151,7 @@ export default class CreateAccount extends React.Component {
         
                     <div className='row'>
                         <div className='col-12 col-sm-12 col-md-12 col-lg-6 col-xl-6 container'>
-                            <button className='btn btn-primary' onClick={this.createAccount} disabled={!state.mail || !state.password || !state.username}>Enviar</button>
+                            <button className='btn btn-primary' onClick={this.createAccount} disabled={!state.mail || !state.password || !state.username || !state.mailaddressIsValid}>Enviar</button>
                             <button className='btn btn-danger' onClick={this.clearFields} style={{marginLeft:'1%'}}>Limpar</button>
                         </div>
                     </div>  

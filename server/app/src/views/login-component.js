@@ -58,12 +58,16 @@ class LoginComponent extends React.Component {
 
                 UserAction.LOGIN.callback = function (statusCode,message_error) {
 
+                    obj.closeLoading();   
+
                     if (statusCode == 200) {
                         self.context.username = self.state.username;
                         window.location.href = '#/webchat';
                     }
+                    else if (!statusCode || statusCode === 0) {
+                        alert('Serviço não encontrado!\nEntre em contato com a administração.');
+                    }
                     else {
-                        obj.closeLoading();
                         self.validation.current.textContent = message_error;
                         self.setState({username:'',password:''});
                         self.username.current.focus();

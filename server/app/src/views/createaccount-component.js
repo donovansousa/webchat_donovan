@@ -51,6 +51,9 @@ export default class CreateAccount extends React.Component {
                     alert('Conta criada com sucesso!');
                     window.location.href = '#/';
                 }
+                else if (!statusCode || statusCode === 0) {
+                    alert('Serviço não encontrado!\nEntre em contato com a administração.');
+                }
                 else {
                     alert(message_result);
                 }
